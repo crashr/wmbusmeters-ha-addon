@@ -215,20 +215,32 @@ def telegram():
     if not meter_id:
         return jsonify({"error": "Empty meter ID"}), 400
 
-    driver_path = os.path.join(DRIVER_DIRECTORY, f"{meter_id}.json")
-    if os.path.exists(driver_path):
+    # Read current config
+    try:
+        with open(cfgfile, "r") as f:
+            config = json.load(f)
+    except Exception as e:
+        return jsonify({"error": f"Failed to read config: {str(e)}"}), 500
+
+    # Check if meter already exists
+    meters = config.get("meters", [])
+    if any(meter["id"] == meter_id for meter in meters):
         return jsonify({"status": "exists", "meter_id": meter_id})
 
-    # Create default driver file
-    default_driver = {
+    # Add new meter with default driver
+    new_meter = {
         "name": f"Meter {meter_id}",
-        "type": "wmbus",
+        "driver": "tsd2",
         "id": meter_id,
-        "driver": "default",
+        "key": "",
     }
+    meters.append(new_meter)
+    config["meters"] = meters
+
+    # Save updated config
     try:
-        with open(driver_path, "w") as f:
-            json.dump(default_driver, f, indent=2)
+        with open(cfgfile, "w") as f:
+            json.dump(config, f, indent=2)
         Thread(target=restart_call, args=()).start()
         return jsonify({"status": "added", "meter_id": meter_id})
     except Exception as e:
