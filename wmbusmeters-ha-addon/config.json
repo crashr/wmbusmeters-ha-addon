@@ -5,7 +5,7 @@
     "description": "Acquire utility meter readings using the wireless mbus protocol (WMBUS)",
     "arch": ["armv7", "aarch64", "amd64"],
     "url": "https://github.com/crashr/wmbusmeters-ha-addon",
-    "image": "crashr/wmbusmeters-ha-addon-{arch}",
+    "image": "wmbusmeters/wmbusmeters-ha-addon-{arch}",
     "panel_icon": "mdi:home-automation",
     "init" : false,
     "ingress": true,
